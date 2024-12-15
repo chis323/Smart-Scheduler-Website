@@ -3,267 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Saved Schedules</title>
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth-compat.js"></script>
+    <title>Saved Schedules - ProScheduler</title>
     <style>
-        /* Gradient Background */
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #81c784, #fff176); /* Green to Yellow Gradient */
-            color: #333;
-            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #66bb6a, #ffeb3b);
+            color: #000;
             display: flex;
-            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            flex-direction: column;
         }
 
         h1 {
-            text-align: center;
-            color: #4caf50;
+            font-size: 2.5rem;
             margin-bottom: 20px;
+            color: #000;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            background-color: #d2f260; /* Dark yellow-greenish color */
+            border-radius: 10px;
+            padding: 10px;
+            width: 90%;
+            max-width: 1000px;
+            text-align: center;
+            margin: 0 auto;
         }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #ffffffb3; /* Slightly transparent white background */
+            text-align: center;
+            background: rgba(102, 187, 106, 0.7);
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            justify-content: space-around;
+        }
+
+        .schedule-box {
+            background-color: rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            width: 45%;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .schedule-box h2 {
+            font-size: 1.8rem;
+            color: #000;
+            margin-bottom: 10px;
+            background-color: #d2f260; /* Dark yellow-greenish color */
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .schedule-list {
+            list-style-type: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        .schedule-list li {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .schedule-list li:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #f1f8c6;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Tabs */
-        .tabs {
+            width: 400px;
             display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #4caf50;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #66bb6a;
         }
 
-        .tab {
-            padding: 12px 25px;
-            margin: 0 15px;
-            cursor: pointer;
-            font-weight: bold;
-            border: 2px solid #4caf50;
-            border-radius: 8px;
-            background-color: #ffffff;
-            transition: background-color 0.3s ease;
+        .modal h3 {
+            color: #d2f260; /* Dark yellow-greenish color */
         }
 
-        .tab:hover {
-            background-color: #c8e6c9; /* Light green on hover */
-        }
-
-        .tab.active {
-            background-color: #4caf50;
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Schedule Boxes */
-        .schedule-box {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-        }
-
-        .schedule-name {
-            font-size: 18px;
-            font-weight: bold;
+        .modal input {
+            padding: 10px;
             margin-bottom: 10px;
-            color: #388e3c; /* Darker Green for schedule name */
+            border-radius: 5px;
+            border: 1px solid #66bb6a;
+            width: 80%;
+            font-size: 1rem;
         }
 
-        .day-schedule {
-            margin-bottom: 15px;
+        .modal button {
+            padding: 10px 20px;
+            background-color: #66bb6a;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            margin: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
         }
 
-        .day-schedule h3 {
-            margin: 0;
-            color: #388e3c; /* Dark Green */
+        .modal button:hover {
+            background-color: #388e3c;
         }
 
-        .hour-task {
-            margin-left: 20px;
-            color: #555; /* Dark grey for tasks */
+        .cancel-button {
+            background-color: #ffeb3b;
         }
 
-        .no-schedules {
-            text-align: center;
-            color: #888;
+        .cancel-button:hover {
+            background-color: #fbc02d;
         }
 
         .back-button {
-            display: block;
-            margin: 20px auto;
-            padding: 12px 25px;
-            font-size: 16px;
-            background-color: #388e3c;
-            color: white;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #66bb6a;
+            color: #000000;
             border: none;
-            border-radius: 8px;
+            border-radius: 5px;
+            font-size: 1.2rem;
             cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
         }
 
         .back-button:hover {
-            background-color: #66bb6a; /* Light green hover effect */
+            background-color: #388e3c;
         }
     </style>
-</head>
-<body>
-    <h1>Your Saved Schedules</h1>
-    <div class="container">
-        <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab active" id="public-tab">Public Schedules</div>
-            <div class="tab" id="private-tab">Private Schedules</div>
-        </div>
-
-        <!-- Tab Content -->
-        <div id="public-schedules" class="tab-content active">
-            <p id="loading-public">Loading your public schedules...</p>
-            <div id="public-schedules-container"></div>
-        </div>
-        <div id="private-schedules" class="tab-content">
-            <p id="loading-private">Loading your private schedules...</p>
-            <div id="private-schedules-container"></div>
-        </div>
-    </div>
-    <a href="index.html" class="back-button">Go Back</a>
-
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
     <script>
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAN9W7qAEebjEVQHwK3LLxTlx7wL0EQtBQ",
             authDomain: "proba-ioane.firebaseapp.com",
             projectId: "proba-ioane",
             storageBucket: "proba-ioane.appspot.com",
             messagingSenderId: "123849206125",
-            appId: "1:123849206125:web:38ce2f2bb1cb2421264",
+            appId: "1:123849206125:web:38ce2f2bb8fb1cb2421264",
             databaseURL: "https://proba-ioane-default-rtdb.europe-west1.firebasedatabase.app",
         };
 
-        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth = firebase.auth();
 
-        // Fetch schedules for the logged-in user
-        async function fetchUserSchedules(isPrivate = false) {
-            const schedulesContainer = isPrivate ? document.getElementById('private-schedules-container') : document.getElementById('public-schedules-container');
-            const loadingMessage = isPrivate ? document.getElementById('loading-private') : document.getElementById('loading-public');
-            
-            try {
-                const currentUser = firebase.auth().currentUser;
-                if (!currentUser) {
-                    window.location.href = 'index.html';
-                    return;
-                }
+        window.onload = function() {
+            const publicList = document.getElementById("public-list");
+            const privateList = document.getElementById("private-list");
 
-                const userName = currentUser.displayName;
+            const schedulesRef = database.ref("schedules");
+            schedulesRef.on("value", function(snapshot) {
+                publicList.innerHTML = "";
+                privateList.innerHTML = "";
+                snapshot.forEach(function(childSnapshot) {
+                    const schedule = childSnapshot.val();
+                    const scheduleName = schedule.name;
+                    const schedulePassword = schedule.password;
+                    const scheduleItem = document.createElement("li");
+                    scheduleItem.textContent = scheduleName;
 
-                if (!userName) {
-                    alert("User name is not available. Please update your profile.");
-                    return;
-                }
+                    scheduleItem.onclick = function() {
+                        if (schedulePassword) {
+                            showPasswordModal(scheduleName, schedulePassword);
+                        } else {
+                            showSchedule(scheduleName);
+                        }
+                    };
 
-                const schedulesRef = firebase.database().ref('schedules');
-                const query = isPrivate
-                    ? schedulesRef.orderByChild('userName').equalTo(userName).orderByChild('privacy').equalTo('private')
-                    : schedulesRef.orderByChild('userName').equalTo(userName).orderByChild('privacy').equalTo('public');
-
-                const snapshot = await query.once('value');
-                loadingMessage.style.display = 'none';
-
-                if (!snapshot.exists()) {
-                    schedulesContainer.innerHTML = '<p class="no-schedules">You have no saved schedules.</p>';
-                    return;
-                }
-
-                const schedules = snapshot.val();
-                schedulesContainer.innerHTML = '';
-
-                Object.keys(schedules).forEach((scheduleId) => {
-                    const schedule = schedules[scheduleId];
-                    const scheduleDiv = document.createElement('div');
-                    scheduleDiv.classList.add('schedule-box');
-
-                    const scheduleNameDiv = document.createElement('div');
-                    scheduleNameDiv.classList.add('schedule-name');
-                    scheduleNameDiv.textContent = schedule.name;
-                    scheduleDiv.appendChild(scheduleNameDiv);
-
-                    Object.keys(schedule.scheduleData).forEach((day) => {
-                        const dayScheduleDiv = document.createElement('div');
-                        dayScheduleDiv.classList.add('day-schedule');
-
-                        const dayHeading = document.createElement('h3');
-                        dayHeading.textContent = day.charAt(0).toUpperCase() + day.slice(1);
-                        dayScheduleDiv.appendChild(dayHeading);
-
-                        schedule.scheduleData[day].forEach((task, index) => {
-                            if (task) {
-                                const taskParagraph = document.createElement('p');
-                                taskParagraph.classList.add('hour-task');
-                                taskParagraph.innerHTML = `<strong>${8 + index}:00</strong> - ${task}`;
-                                dayScheduleDiv.appendChild(taskParagraph);
-                            }
-                        });
-
-                        scheduleDiv.appendChild(dayScheduleDiv);
-                    });
-
-                    schedulesContainer.appendChild(scheduleDiv);
+                    if (schedulePassword) {
+                        privateList.appendChild(scheduleItem);
+                    } else {
+                        publicList.appendChild(scheduleItem);
+                    }
                 });
-            } catch (error) {
-                console.error('Error fetching schedules:', error);
-                schedulesContainer.innerHTML = '<p class="no-schedules">Error loading schedules. Please try again later.</p>';
-            }
+            });
+        };
+
+        function showSchedule(scheduleName) {
+            alert("Displaying schedule: " + scheduleName);
         }
 
-        // Switch Tabs
-        document.getElementById('public-tab').addEventListener('click', () => {
-            document.getElementById('public-tab').classList.add('active');
-            document.getElementById('private-tab').classList.remove('active');
-            document.getElementById('public-schedules').classList.add('active');
-            document.getElementById('private-schedules').classList.remove('active');
-            fetchUserSchedules(false); // Load public schedules
-        });
+        function showPasswordModal(scheduleName, correctPassword) {
+            const modal = document.getElementById("password-modal");
+            const passwordInput = document.getElementById("password-input");
+            const submitButton = document.getElementById("submit-password");
+            const cancelButton = document.getElementById("cancel-password");
 
-        document.getElementById('private-tab').addEventListener('click', () => {
-            document.getElementById('private-tab').classList.add('active');
-            document.getElementById('public-tab').classList.remove('active');
-            document.getElementById('private-schedules').classList.add('active');
-            document.getElementById('public-schedules').classList.remove('active');
-            fetchUserSchedules(true); // Load private schedules
-        });
+            modal.style.display = "flex";
 
-        // Authenticate user and fetch schedules on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    fetchUserSchedules(false); // Default to public schedules
+            passwordInput.value = "";
+
+            submitButton.onclick = function() {
+                const enteredPassword = passwordInput.value;
+                if (enteredPassword === correctPassword) {
+                    modal.style.display = "none";
+                    showSchedule(scheduleName);
                 } else {
-                    window.location.href = 'index.html';
+                    alert("Incorrect password. Try again.");
                 }
-            });
-        });
+            };
+
+            cancelButton.onclick = function() {
+                modal.style.display = "none";
+            };
+        }
+
+        function goBack() {
+            window.location.href = "index.html";
+        }
     </script>
+</head>
+<body>
+    <h1>Saved Schedules</h1>
+
+    <div class="container">
+        <div class="schedule-box">
+            <h2>Public Schedules</h2>
+            <ul id="public-list" class="schedule-list"></ul>
+        </div>
+
+        <div class="schedule-box">
+            <h2>Private Schedules</h2>
+            <ul id="private-list" class="schedule-list"></ul>
+        </div>
+    </div>
+
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <h3>Enter Password</h3>
+            <input type="password" id="password-input" placeholder="Password" />
+            <button id="submit-password">Submit</button>
+            <button id="cancel-password" class="cancel-button">Cancel</button>
+        </div>
+    </div>
+
+    <button class="back-button" onclick="goBack()">Back</button>
 </body>
 </html>
-
