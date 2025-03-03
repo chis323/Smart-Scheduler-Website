@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a New Schedule - ProScheduler</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(179deg, #000000, #6d0000); /* Dark red gradient */
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            flex-direction: column; /* Align everything in a column */
+        }
+
+        .container h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0rem;
+            color: #FFDDDD; /* Light pink for contrast */
+        }
+
+        h1 {
+            font-size: 1.5rem; /* Smaller title */
+            margin-bottom: 2px;
+        }
+
+        .button-section {
+            display: flex;
+            flex-direction: column; /* Stack items vertically */
+            align-items: center;
+            justify-content: center;
+            gap: 2px; /* Smaller spacing between elements */
+            padding: 0;
+        }
+
+        .tagline {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: #FFAAAA; /* Light red */
+        }
+
+        .days-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr); /* 7 columns for each day */
+            gap: 10px;
+            width: 100%;
+            height: calc(100% - 4rem);
+            overflow: hidden;
+            padding: 0 5px;
+        }
+
+        .day-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .day-label {
+            font-size: 1.2rem;
+            color: #FFDDDD;
+            margin-bottom: 1rem;
+        }
+
+        .hours-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .hour-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hour-label {
+            font-size: 1rem;
+            color: #FFDDDD;
+            width: 60px; /* Fixed width for hour label */
+        }
+
+        .hour-input {
+            font-size: 1rem;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #AA0000; /* Dark red border */
+            color: #333;
+            width: calc(100% - 80px);
+            margin-bottom: 5px;
+            height: 50px;
+        }
+
+        .input-field {
+            font-size: 0.9rem;
+            padding: 8px 10px;
+            width: 100%;
+            max-width: 200px;
+            border-radius: 5px;
+            border: 1px solid #AA0000;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 0.5rem;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            margin-bottom: 4px;
+        }
+
+        .save-button {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            margin: 0;
+            border-radius: 5px;
+            background-color: #B22222; /* Firebrick Red */
+            color: #fff;
+            border: none;
+            width: 100%;
+            max-width: 200px;
+            transition: background-color 0.3s;
+        }
+
+        .save-button:hover {
+            background-color: #8B0000; /* Dark Red on hover */
+        }
+
+        #schedule-name {
+            font-size: 1rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #AA0000;
+            color: #333;
+            width: 200px;
+            margin-bottom: 2px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #B22222; /* Firebrick */
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 1000;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
+    <script>
+        // Firebase configuration (Use your own Firebase config here)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAN9W7qAEebjEVQHwK3LLxTlx7wL0EQtBQ",
+            authDomain: "proba-ioane.firebaseapp.com",
+            projectId: "proba-ioane",
+            storageBucket: "proba-ioane.appspot.com",
+            messagingSenderId: "123849206125",
+            appId: "1:123849206125:web:38ce2f2bb8fb1cb2421264",
+            databaseURL: "https://proba-ioane-default-rtdb.europe-west1.firebasedatabase.app", // Updated URL here
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Function to save the schedule
+        // Function to save the schedule
+// Function to save the schedule
+
+
+
+function saveSchedule() {
+    const scheduleName = document.getElementById('schedule-name').value.trim();  // Get the schedule name and trim extra spaces
+    const schedulePassword = document.getElementById('schedule-password').value.trim();  // Get the password and trim extra spaces
+
+    if (!scheduleName) {
+        alert("Please enter a schedule name before saving!"); // Alert if the name is empty
+        return; // Prevent saving if the name is empty
+    }
+
+    const scheduleData = {};
+
+    // Loop through each day and collect the tasks for each hour
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    days.forEach((day) => {
+        const dayTasks = [];
+        for (let i = 8; i <= 22; i++) { // Loop from 8 AM to 10 PM (hours 8-22)
+            const hourInput = document.getElementById(`${day}-${i}`);
+            if (hourInput) {
+                dayTasks.push(hourInput.value); // Get the value from the text input if it exists
+            } else {
+                console.warn(`Input for ${day} ${i} not found.`);
+            }
+        }
+        scheduleData[day] = dayTasks;
+    });
+
+    // Add the schedule name to the schedule data
+    scheduleData.name = scheduleName;
+
+    // Only add the password if it's provided (make password optional)
+    if (schedulePassword) {
+        scheduleData.password = schedulePassword;  // Store the password only if it is provided
+    }
+
+    // Save the schedule data to Firebase Realtime Database
+    const scheduleRef = database.ref('schedules').push();
+    scheduleRef.set(scheduleData)
+        .then(() => {
+            showNotification("Schedule saved successfully!"); // Show success notification
+        })
+        .catch((error) => {
+            console.error('Error saving schedule:', error);
+            showNotification("Error saving schedule. Please try again."); // Show error notification
+        });
+}
+
+// Show notification function
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.style.display = 'block';
+    setTimeout(() => {
+        notification.style.opacity = 1;
+    }, 100); // Make the notification visible
+
+    setTimeout(() => {
+        notification.style.opacity = 0;
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 500); // Hide the notification after the fade-out
+    }, 3000); // Keep the notification for 3 seconds
+}
+
+    </script>
+</head>
+<link rel="icon" href="titleimage.png" type="image/png">
+<body>
+    
+    <div class="container">
+        <h1>Create a New Schedule</h1>
+    
+        <!-- Buttons section -->
+        <div class="button-section">
+            <input type="text" id="schedule-name" class="input-field" placeholder="Enter Schedule Name">
+            <input type="password" id="schedule-password" class="input-field" placeholder="Enter Password"> <!-- Same class for styling -->
+            <button class="save-button" onclick="saveSchedule()">Save your work!</button>
+            <button class="save-button" onclick="goBack()">Go Back</button> <!-- Added Go Back button -->
+        </div>
+    </div>
+        <script>
+            // Function to navigate to index.html
+            function goBack() {
+                window.location.href = 'index.html'; // Redirect to index.html
+            }
+        </script>
+        <div class="days-container">
+            <!-- Monday -->
+            <div class="day-box">
+                <div class="day-label">Monday</div>
+                <div class="hours-container">
+                    <div class="hour-container">
+                        <span class="hour-label">8 AM</span>
+                        <input type="text" id="monday-8" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">9 AM</span>
+                        <input type="text" id="monday-9" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">10 AM</span>
+                        <input type="text" id="monday-10" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">11 AM</span>
+                        <input type="text" id="monday-11" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">12 PM</span>
+                        <input type="text" id="monday-12" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">1 PM</span>
+                        <input type="text" id="monday-13" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">2 PM</span>
+                        <input type="text" id="monday-14" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">3 PM</span>
+                        <input type="text" id="monday-15" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">4 PM</span>
+                        <input type="text" id="monday-16" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">5 PM</span>
+                        <input type="text" id="monday-17" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">6 PM</span>
+                        <input type="text" id="monday-18" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">7 PM</span>
+                        <input type="text" id="monday-19" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">8 PM</span>
+                        <input type="text" id="monday-20" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">9 PM</span>
+                        <input type="text" id="monday-21" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">10 PM</span>
+                        <input type="text" id="monday-22" class="hour-input" placeholder="Your Task">
+                    </div>
+                </div>
+            </div>
+            
+            
+            <!-- Tuesday -->
+            <div class="day-box">
+                <div class="day-label">Tuesday</div>
+                <div class="hours-container">
+                    <div class="hour-container">
+                        <span class="hour-label">8 AM</span>
+                        <input type="text" id="tuesday-8" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">9 AM</span>
+                        <input type="text" id="tuesday-9" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">10 AM</span>
+                        <input type="text" id="tuesday-10" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">11 AM</span>
+                        <input type="text" id="tuesday-11" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">12 PM</span>
+                        <input type="text" id="tuesday-12" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">1 PM</span>
+                        <input type="text" id="tuesday-13" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">2 PM</span>
+                        <input type="text" id="tuesday-14" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">3 PM</span>
+                        <input type="text" id="tuesday-15" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">4 PM</span>
+                        <input type="text" id="tuesday-16" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">5 PM</span>
+                        <input type="text" id="tuesday-17" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">6 PM</span>
+                        <input type="text" id="tuesday-18" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">7 PM</span>
+                        <input type="text" id="tuesday-19" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">8 PM</span>
+                        <input type="text" id="tuesday-20" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">9 PM</span>
+                        <input type="text" id="tuesday-21" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">10 PM</span>
+                        <input type="text" id="tuesday-22" class="hour-input" placeholder="Your Task">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wednesday -->
+            <div class="day-box">
+                <div class="day-label">Wednesday</div>
+                <div class="hours-container">
+                    <div class="hour-container">
+                        <span class="hour-label">8 AM</span>
+                        <input type="text" id="wednesday-8" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">9 AM</span>
+                        <input type="text" id="wednesday-9" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">10 AM</span>
+                        <input type="text" id="wednesday-10" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">11 AM</span>
+                        <input type="text" id="wednesday-11" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">12 PM</span>
+                        <input type="text" id="wednesday-12" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">1 PM</span>
+                        <input type="text" id="wednesday-13" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">2 PM</span>
+                        <input type="text" id="wednesday-14" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">3 PM</span>
+                        <input type="text" id="wednesday-15" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">4 PM</span>
+                        <input type="text" id="wednesday-16" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">5 PM</span>
+                        <input type="text" id="wednesday-17" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">6 PM</span>
+                        <input type="text" id="wednesday-18" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">7 PM</span>
+                        <input type="text" id="wednesday-19" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">8 PM</span>
+                        <input type="text" id="wednesday-20" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">9 PM</span>
+                        <input type="text" id="wednesday-21" class="hour-input" placeholder="Your Task">
+                    </div>
+                    <div class="hour-container">
+                        <span class="hour-label">10 PM</span>
+                        <input type="text" id="wednesday-22" class="hour-input" placeholder="Your Task">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thursday -->
+<div class="day-box">
+    <div class="day-label">Thursday</div>
+    <div class="hours-container">
+        <div class="hour-container">
+            <span class="hour-label">8 AM</span>
+            <input type="text" id="thursday-8" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">9 AM</span>
+            <input type="text" id="thursday-9" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">10 AM</span>
+            <input type="text" id="thursday-10" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">11 AM</span>
+            <input type="text" id="thursday-11" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">12 PM</span>
+            <input type="text" id="thursday-12" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">1 PM</span>
+            <input type="text" id="thursday-13" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">2 PM</span>
+            <input type="text" id="thursday-14" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">3 PM</span>
+            <input type="text" id="thursday-15" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">4 PM</span>
+            <input type="text" id="thursday-16" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">5 PM</span>
+            <input type="text" id="thursday-17" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">6 PM</span>
+            <input type="text" id="thursday-18" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">7 PM</span>
+            <input type="text" id="thursday-19" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">8 PM</span>
+            <input type="text" id="thursday-20" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">9 PM</span>
+            <input type="text" id="thursday-21" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">10 PM</span>
+            <input type="text" id="thursday-22" class="hour-input" placeholder="Your Task">
+        </div>
+    </div>
+</div>
+
+<!-- Friday -->
+<div class="day-box">
+    <div class="day-label">Friday</div>
+    <div class="hours-container">
+        <div class="hour-container">
+            <span class="hour-label">8 AM</span>
+            <input type="text" id="friday-8" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">9 AM</span>
+            <input type="text" id="friday-9" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">10 AM</span>
+            <input type="text" id="friday-10" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">11 AM</span>
+            <input type="text" id="friday-11" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">12 PM</span>
+            <input type="text" id="friday-12" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">1 PM</span>
+            <input type="text" id="friday-13" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">2 PM</span>
+            <input type="text" id="friday-14" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">3 PM</span>
+            <input type="text" id="friday-15" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">4 PM</span>
+            <input type="text" id="friday-16" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">5 PM</span>
+            <input type="text" id="friday-17" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">6 PM</span>
+            <input type="text" id="friday-18" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">7 PM</span>
+            <input type="text" id="friday-19" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">8 PM</span>
+            <input type="text" id="friday-20" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">9 PM</span>
+            <input type="text" id="friday-21" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">10 PM</span>
+            <input type="text" id="friday-22" class="hour-input" placeholder="Your Task">
+        </div>
+    </div>
+</div>
+
+<!-- Saturday -->
+<div class="day-box">
+    <div class="day-label">Saturday</div>
+    <div class="hours-container">
+        <div class="hour-container">
+            <span class="hour-label">8 AM</span>
+            <input type="text" id="saturday-8" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">9 AM</span>
+            <input type="text" id="saturday-9" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">10 AM</span>
+            <input type="text" id="saturday-10" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">11 AM</span>
+            <input type="text" id="saturday-11" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">12 PM</span>
+            <input type="text" id="saturday-12" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">1 PM</span>
+            <input type="text" id="saturday-13" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">2 PM</span>
+            <input type="text" id="saturday-14" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">3 PM</span>
+            <input type="text" id="saturday-15" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">4 PM</span>
+            <input type="text" id="saturday-16" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">5 PM</span>
+            <input type="text" id="saturday-17" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">6 PM</span>
+            <input type="text" id="saturday-18" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">7 PM</span>
+            <input type="text" id="saturday-19" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">8 PM</span>
+            <input type="text" id="saturday-20" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">9 PM</span>
+            <input type="text" id="saturday-21" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">10 PM</span>
+            <input type="text" id="saturday-22" class="hour-input" placeholder="Your Task">
+        </div>
+    </div>
+</div>
+
+
+<!-- Sunday -->
+<div class="day-box">
+    <div class="day-label">Sunday</div>
+    <div class="hours-container">
+        <div class="hour-container">
+            <span class="hour-label">8 AM</span>
+            <input type="text" id="sunday-8" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">9 AM</span>
+            <input type="text" id="sunday-9" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">10 AM</span>
+            <input type="text" id="sunday-10" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">11 AM</span>
+            <input type="text" id="sunday-11" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">12 PM</span>
+            <input type="text" id="sunday-12" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">1 PM</span>
+            <input type="text" id="sunday-13" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">2 PM</span>
+            <input type="text" id="sunday-14" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">3 PM</span>
+            <input type="text" id="sunday-15" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">4 PM</span>
+            <input type="text" id="sunday-16" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">5 PM</span>
+            <input type="text" id="sunday-17" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">6 PM</span>
+            <input type="text" id="sunday-18" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">7 PM</span>
+            <input type="text" id="sunday-19" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">8 PM</span>
+            <input type="text" id="sunday-20" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">9 PM</span>
+            <input type="text" id="sunday-21" class="hour-input" placeholder="Your Task">
+        </div>
+        <div class="hour-container">
+            <span class="hour-label">10 PM</span>
+            <input type="text" id="sunday-22" class="hour-input" placeholder="Your Task">
+        </div>
+    </div>
+</div>
+
+            <!-- Repeat the above structure for Tuesday, Wednesday, Thursday, etc... -->
+
+        </div>
+
+       
+
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+</body>
+</html>
